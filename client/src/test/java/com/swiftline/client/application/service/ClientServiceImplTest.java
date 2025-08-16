@@ -7,6 +7,7 @@ import com.swiftline.client.domain.repository.ClientRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.modelmapper.ModelMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +25,7 @@ class ClientServiceImplTest {
     @BeforeEach
     void setUp() {
         clientRepository = mock(ClientRepository.class);
-        service = new ClientServiceImpl(clientRepository);
+        service = new ClientServiceImpl(clientRepository, new ModelMapper());
     }
 
     @Test
@@ -122,4 +123,3 @@ class ClientServiceImplTest {
         return c;
     }
 }
-

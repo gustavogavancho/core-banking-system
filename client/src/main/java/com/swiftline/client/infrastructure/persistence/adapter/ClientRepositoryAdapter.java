@@ -6,26 +6,28 @@ import com.swiftline.client.domain.repository.ClientRepository;
 import com.swiftline.client.infrastructure.persistence.entity.ClientEntity;
 import com.swiftline.client.infrastructure.persistence.entity.PersonEntity;
 import com.swiftline.client.infrastructure.persistence.repository.ClientJpaRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Repository
 @Transactional
 public class ClientRepositoryAdapter implements ClientRepository {
 
     private final ClientJpaRepository clientJpaRepository;
+    private final ModelMapper mapper;
 
-    public ClientRepositoryAdapter(ClientJpaRepository clientJpaRepository) {
+    public ClientRepositoryAdapter(ClientJpaRepository clientJpaRepository, ModelMapper mapper) {
         this.clientJpaRepository = clientJpaRepository;
+        this.mapper = mapper;
     }
 
     @Override
     public Client save(Client client) {
-        // Crear PersonEntity desde dominio
+        // Crear PersonEntity desde dominio con ModelMapper
         PersonEntity personEntity = toPersonEntity(client);
         // Construir ClientEntity con cascada para persistir person y compartir PK con @MapsId
         ClientEntity clientEntity = ClientEntity.builder()
@@ -46,7 +48,7 @@ public class ClientRepositoryAdapter implements ClientRepository {
     @Override
     @Transactional(readOnly = true)
     public List<Client> findAll() {
-        return clientJpaRepository.findAll().stream().map(this::toDomain).collect(Collectors.toList());
+        return clientJpaRepository.findAll().stream().map(this::toDomain).toList();
     }
 
     @Override
@@ -80,28 +82,10 @@ public class ClientRepositoryAdapter implements ClientRepository {
     }
 
     private Client toDomain(ClientEntity entity) {
-        PersonEntity p = entity.getPerson();
-        return Client.builder()
-                .id(entity.getId())
-                .name(p.getName())
-                .gender(p.getGender())
-                .age(p.getAge())
-                .identification(p.getIdentification())
-                .address(p.getAddress())
-                .phoneNumber(p.getPhoneNumber())
-                .password(entity.getPassword())
-                .state(entity.getState())
-                .build();
+        return mapper.map(entity, Client.class);
     }
 
     private PersonEntity toPersonEntity(Person person) {
-        return PersonEntity.builder()
-                .name(person.getName())
-                .gender(person.getGender())
-                .age(person.getAge())
-                .identification(person.getIdentification())
-                .address(person.getAddress())
-                .phoneNumber(person.getPhoneNumber())
-                .build();
+        return mapper.map(person, PersonEntity.class);
     }
 }

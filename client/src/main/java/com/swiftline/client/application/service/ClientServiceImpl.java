@@ -4,6 +4,7 @@ import com.swiftline.client.application.dto.ClientRequest;
 import com.swiftline.client.application.exception.NotFoundException;
 import com.swiftline.client.domain.model.Client;
 import com.swiftline.client.domain.repository.ClientRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,9 +15,11 @@ import java.util.List;
 public class ClientServiceImpl implements ClientService {
 
     private final ClientRepository clientRepository;
+    private final ModelMapper mapper;
 
-    public ClientServiceImpl(ClientRepository clientRepository) {
+    public ClientServiceImpl(ClientRepository clientRepository, ModelMapper mapper) {
         this.clientRepository = clientRepository;
+        this.mapper = mapper;
     }
 
     @Override
@@ -56,15 +59,6 @@ public class ClientServiceImpl implements ClientService {
     }
 
     private Client toDomain(ClientRequest r) {
-        Client c = new Client();
-        c.setName(r.getName());
-        c.setGender(r.getGender());
-        c.setAge(r.getAge());
-        c.setIdentification(r.getIdentification());
-        c.setAddress(r.getAddress());
-        c.setPhoneNumber(r.getPhoneNumber());
-        c.setPassword(r.getPassword());
-        c.setState(r.getState());
-        return c;
+        return mapper.map(r, Client.class);
     }
 }

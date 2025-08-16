@@ -8,6 +8,7 @@ import com.swiftline.client.domain.model.Client;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -30,7 +31,7 @@ class ClientControllerTest {
     @BeforeEach
     void setup() {
         clientService = Mockito.mock(ClientService.class);
-        ClientController controller = new ClientController(clientService);
+        ClientController controller = new ClientController(clientService, new ModelMapper());
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
@@ -137,4 +138,3 @@ class ClientControllerTest {
         return c;
     }
 }
-

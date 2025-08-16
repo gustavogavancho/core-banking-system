@@ -7,6 +7,8 @@ import com.swiftline.client.infrastructure.persistence.repository.ClientJpaRepos
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +25,19 @@ class ClientRepositoryAdapterTest {
     @BeforeEach
     void setUp() {
         clientJpaRepository = mock(ClientJpaRepository.class);
-        adapter = new ClientRepositoryAdapter(clientJpaRepository);
+        ModelMapper mapper = new ModelMapper();
+        mapper.getConfiguration().setSkipNullEnabled(true).setMatchingStrategy(MatchingStrategies.STRICT);
+        mapper.createTypeMap(ClientEntity.class, Client.class)
+                .addMapping(ClientEntity::getId, Client::setId)
+                .addMappings(m -> {
+                    m.map(src -> src.getPerson().getName(), Client::setName);
+                    m.map(src -> src.getPerson().getGender(), Client::setGender);
+                    m.map(src -> src.getPerson().getAge(), Client::setAge);
+                    m.map(src -> src.getPerson().getIdentification(), Client::setIdentification);
+                    m.map(src -> src.getPerson().getAddress(), Client::setAddress);
+                    m.map(src -> src.getPerson().getPhoneNumber(), Client::setPhoneNumber);
+                });
+        adapter = new ClientRepositoryAdapter(clientJpaRepository, mapper);
     }
 
     @Test
@@ -149,4 +163,3 @@ class ClientRepositoryAdapterTest {
                 .build();
     }
 }
-

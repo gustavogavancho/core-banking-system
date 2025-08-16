@@ -5,6 +5,7 @@ import com.swiftline.client.application.dto.ClientResponse;
 import com.swiftline.client.application.service.ClientService;
 import com.swiftline.client.domain.model.Client;
 import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +19,11 @@ import java.util.stream.Collectors;
 public class ClientController {
 
     private final ClientService clientService;
+    private final ModelMapper mapper;
 
-    public ClientController(ClientService clientService) {
+    public ClientController(ClientService clientService, ModelMapper mapper) {
         this.clientService = clientService;
+        this.mapper = mapper;
     }
 
     @PostMapping
@@ -52,16 +55,6 @@ public class ClientController {
     }
 
     private ClientResponse toResponse(Client c) {
-        return ClientResponse.builder()
-                .id(c.getId())
-                .name(c.getName())
-                .gender(c.getGender())
-                .age(c.getAge())
-                .identification(c.getIdentification())
-                .address(c.getAddress())
-                .phoneNumber(c.getPhoneNumber())
-                .state(c.getState())
-                .build();
+        return mapper.map(c, ClientResponse.class);
     }
 }
-
