@@ -2,6 +2,7 @@ package com.swiftline.account.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swiftline.account.application.dto.AccountRequest;
+import com.swiftline.account.application.exception.ClientNotFoundException;
 import com.swiftline.account.application.exception.NotFoundException;
 import com.swiftline.account.application.service.AccountService;
 import com.swiftline.account.domain.model.Account;
@@ -56,6 +57,19 @@ class AccountControllerTest {
     }
 
     @Test
+    void create_shouldReturn400_whenClientNotExists() throws Exception {
+        AccountRequest req = validRequest();
+        when(accountService.create(any(AccountRequest.class)))
+                .thenThrow(new ClientNotFoundException(req.getClientId()));
+
+        mockMvc.perform(post("/accounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Cliente no encontrado con id=" + req.getClientId())));
+    }
+
+    @Test
     void create_shouldReturn400_onValidationErrors() throws Exception {
         AccountRequest bad = validRequest();
         bad.setAccountNumber(""); // NotBlank
@@ -107,6 +121,19 @@ class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(7)))
                 .andExpect(jsonPath("$.clientId", is(req.getClientId().intValue())));
+    }
+
+    @Test
+    void update_shouldReturn400_whenClientNotExists() throws Exception {
+        AccountRequest req = validRequest();
+        when(accountService.update(eq(7L), any(AccountRequest.class)))
+                .thenThrow(new ClientNotFoundException(req.getClientId()));
+
+        mockMvc.perform(put("/accounts/7")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Cliente no encontrado con id=" + req.getClientId())));
     }
 
     @Test

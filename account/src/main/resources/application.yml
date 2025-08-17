@@ -17,3 +17,8 @@ spring:
   sql:
     init:
       mode: never
+
+# Configuracion para validacion de clientes
+client:
+  service:
+    url: http://localhost:8081

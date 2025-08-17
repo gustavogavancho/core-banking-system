@@ -1,6 +1,7 @@
 package com.swiftline.account.application.service;
 
 import com.swiftline.account.application.dto.AccountRequest;
+import com.swiftline.account.application.exception.ClientNotFoundException;
 import com.swiftline.account.application.exception.NotFoundException;
 import com.swiftline.account.domain.model.Account;
 import com.swiftline.account.domain.repository.AccountRepository;
@@ -15,15 +16,24 @@ import java.util.List;
 public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
+    private final ClientValidationService clientValidationService;
     private final ModelMapper mapper;
 
-    public AccountServiceImpl(AccountRepository accountRepository, ModelMapper mapper) {
+    public AccountServiceImpl(AccountRepository accountRepository,
+                              ClientValidationService clientValidationService,
+                              ModelMapper mapper) {
         this.accountRepository = accountRepository;
+        this.clientValidationService = clientValidationService;
         this.mapper = mapper;
     }
 
     @Override
     public Account create(AccountRequest request) {
+        // Validar que el cliente existe antes de crear la cuenta
+        if (!clientValidationService.existsById(request.getClientId())) {
+            throw new ClientNotFoundException(request.getClientId());
+        }
+
         Account account = toDomain(request);
         return accountRepository.save(account);
     }
@@ -46,6 +56,12 @@ public class AccountServiceImpl implements AccountService {
         if (!accountRepository.existsById(id)) {
             throw new NotFoundException("Cuenta no encontrada con id=" + id);
         }
+
+        // Validar que el cliente existe antes de actualizar la cuenta
+        if (!clientValidationService.existsById(request.getClientId())) {
+            throw new ClientNotFoundException(request.getClientId());
+        }
+
         Account account = toDomain(request);
         return accountRepository.update(id, account);
     }
@@ -62,4 +78,3 @@ public class AccountServiceImpl implements AccountService {
         return mapper.map(r, Account.class);
     }
 }
-
