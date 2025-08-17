@@ -97,20 +97,6 @@ class TransactionServiceImplTest {
         assertThrows(NotFoundException.class, () -> service.update(7L, req()));
     }
 
-    @Test
-    void delete_shouldCallRepo_whenExists() {
-        when(txRepo.existsById(3L)).thenReturn(true);
-        doNothing().when(txRepo).deleteById(3L);
-        assertDoesNotThrow(() -> service.delete(3L));
-        verify(txRepo).deleteById(3L);
-    }
-
-    @Test
-    void delete_shouldThrow_whenMissing() {
-        when(txRepo.existsById(3L)).thenReturn(false);
-        assertThrows(NotFoundException.class, () -> service.delete(3L));
-    }
-
     private TransactionRequest req() {
         return TransactionRequest.builder()
                 .date(LocalDateTime.now())
@@ -120,4 +106,3 @@ class TransactionServiceImplTest {
                 .build();
     }
 }
-

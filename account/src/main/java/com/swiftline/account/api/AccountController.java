@@ -48,14 +48,7 @@ public class AccountController {
         return toResponse(accountService.update(id, request));
     }
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        accountService.delete(id);
-    }
-
     private AccountResponse toResponse(Account a) {
         return mapper.map(a, AccountResponse.class);
     }
 }
-

@@ -92,14 +92,6 @@ class AccountRepositoryAdapterTest {
     }
 
     @Test
-    void deleteById_shouldCallJpa_whenExists() {
-        when(jpa.existsById(3L)).thenReturn(true);
-        doNothing().when(jpa).deleteById(3L);
-        adapter.deleteById(3L);
-        verify(jpa).deleteById(3L);
-    }
-
-    @Test
     void existsById_shouldDelegate() {
         when(jpa.existsById(1L)).thenReturn(true);
         assertTrue(adapter.existsById(1L));

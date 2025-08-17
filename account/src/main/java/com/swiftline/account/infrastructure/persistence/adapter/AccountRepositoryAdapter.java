@@ -55,13 +55,6 @@ public class AccountRepositoryAdapter implements AccountRepository {
     }
 
     @Override
-    public void deleteById(Long id) {
-        if (accountJpaRepository.existsById(id)) {
-            accountJpaRepository.deleteById(id);
-        }
-    }
-
-    @Override
     public boolean existsById(Long id) {
         return accountJpaRepository.existsById(id);
     }

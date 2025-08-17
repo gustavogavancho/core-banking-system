@@ -129,18 +129,4 @@ class AccountServiceImplTest {
         verify(clientValidationService).existsById(999L);
         verify(repo, never()).update(any(Long.class), any(Account.class));
     }
-
-    @Test
-    void delete_shouldCallRepo_whenExists() {
-        when(repo.existsById(3L)).thenReturn(true);
-        doNothing().when(repo).deleteById(3L);
-        assertDoesNotThrow(() -> service.delete(3L));
-        verify(repo).deleteById(3L);
-    }
-
-    @Test
-    void delete_shouldThrow_whenMissing() {
-        when(repo.existsById(3L)).thenReturn(false);
-        assertThrows(NotFoundException.class, () -> service.delete(3L));
-    }
 }

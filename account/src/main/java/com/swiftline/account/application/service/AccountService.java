@@ -10,6 +10,4 @@ public interface AccountService {
     Account get(Long id);
     List<Account> list();
     Account update(Long id, AccountRequest request);
-    void delete(Long id);
 }
-

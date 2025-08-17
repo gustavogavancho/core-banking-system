@@ -10,7 +10,5 @@ public interface AccountRepository {
     Optional<Account> findById(Long id);
     List<Account> findAll();
     Account update(Long id, Account account);
-    void deleteById(Long id);
     boolean existsById(Long id);
 }
-

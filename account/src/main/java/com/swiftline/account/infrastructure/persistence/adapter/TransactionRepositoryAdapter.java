@@ -62,13 +62,6 @@ public class TransactionRepositoryAdapter implements TransactionRepository {
     }
 
     @Override
-    public void deleteById(Long id) {
-        if (transactionJpaRepository.existsById(id)) {
-            transactionJpaRepository.deleteById(id);
-        }
-    }
-
-    @Override
     public boolean existsById(Long id) {
         return transactionJpaRepository.existsById(id);
     }
@@ -81,4 +74,3 @@ public class TransactionRepositoryAdapter implements TransactionRepository {
         return mapper.map(transaction, TransactionEntity.class);
     }
 }
-

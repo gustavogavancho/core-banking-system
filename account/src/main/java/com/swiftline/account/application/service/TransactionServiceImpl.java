@@ -61,16 +61,7 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.update(id, tx);
     }
 
-    @Override
-    public void delete(Long id) {
-        if (!transactionRepository.existsById(id)) {
-            throw new NotFoundException("Movimiento no encontrado con id=" + id);
-        }
-        transactionRepository.deleteById(id);
-    }
-
     private Transaction toDomain(TransactionRequest r) {
         return mapper.map(r, Transaction.class);
     }
 }
-

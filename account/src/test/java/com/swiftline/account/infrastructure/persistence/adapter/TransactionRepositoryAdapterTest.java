@@ -91,14 +91,6 @@ class TransactionRepositoryAdapterTest {
     }
 
     @Test
-    void deleteById_shouldCallJpa_whenExists() {
-        when(txJpa.existsById(3L)).thenReturn(true);
-        doNothing().when(txJpa).deleteById(3L);
-        adapter.deleteById(3L);
-        verify(txJpa).deleteById(3L);
-    }
-
-    @Test
     void existsById_shouldDelegate() {
         when(txJpa.existsById(1L)).thenReturn(true);
         assertTrue(adapter.existsById(1L));
@@ -125,4 +117,3 @@ class TransactionRepositoryAdapterTest {
                 .build();
     }
 }
-

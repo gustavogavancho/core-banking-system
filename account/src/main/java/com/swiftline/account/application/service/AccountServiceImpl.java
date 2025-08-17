@@ -66,14 +66,6 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.update(id, account);
     }
 
-    @Override
-    public void delete(Long id) {
-        if (!accountRepository.existsById(id)) {
-            throw new NotFoundException("Cuenta no encontrada con id=" + id);
-        }
-        accountRepository.deleteById(id);
-    }
-
     private Account toDomain(AccountRequest r) {
         return mapper.map(r, Account.class);
     }

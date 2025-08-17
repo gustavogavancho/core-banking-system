@@ -49,12 +49,6 @@ public class TransactionController {
         return toResponse(transactionService.update(id, request));
     }
 
-    @DeleteMapping("/transactions/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        transactionService.delete(id);
-    }
-
     private TransactionResponse toResponse(Transaction t) {
         return mapper.map(t, TransactionResponse.class);
     }

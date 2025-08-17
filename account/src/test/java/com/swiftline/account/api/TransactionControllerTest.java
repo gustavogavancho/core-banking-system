@@ -103,13 +103,6 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.id", is(7)));
     }
 
-    @Test
-    void delete_shouldReturn204() throws Exception {
-        doNothing().when(transactionService).delete(3L);
-        mockMvc.perform(delete("/transactions/3"))
-                .andExpect(status().isNoContent());
-    }
-
     private TransactionRequest validRequest() {
         return TransactionRequest.builder()
                 .date(LocalDateTime.now())
@@ -130,4 +123,3 @@ class TransactionControllerTest {
                 .build();
     }
 }
-

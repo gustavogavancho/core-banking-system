@@ -10,6 +10,4 @@ public interface TransactionService {
     Transaction get(Long id);
     List<Transaction> listByAccount(Long accountId);
     Transaction update(Long id, TransactionRequest request);
-    void delete(Long id);
 }
-

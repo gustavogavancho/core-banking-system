@@ -136,13 +136,6 @@ class AccountControllerTest {
                 .andExpect(jsonPath("$.message", is("Cliente no encontrado con id=" + req.getClientId())));
     }
 
-    @Test
-    void delete_shouldReturn204() throws Exception {
-        doNothing().when(accountService).delete(3L);
-        mockMvc.perform(delete("/accounts/3"))
-                .andExpect(status().isNoContent());
-    }
-
     private AccountRequest validRequest() {
         return AccountRequest.builder()
                 .accountNumber("0001")

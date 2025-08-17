@@ -10,7 +10,5 @@ public interface TransactionRepository {
     Optional<Transaction> findById(Long id);
     List<Transaction> findByAccountId(Long accountId);
     Transaction update(Long id, Transaction transaction);
-    void deleteById(Long id);
     boolean existsById(Long id);
 }
-
