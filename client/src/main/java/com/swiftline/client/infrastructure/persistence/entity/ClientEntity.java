@@ -21,6 +21,6 @@ public class ClientEntity {
     private PersonEntity person;
 
     private String password;
-    private Boolean state;
+    private Boolean status;
 }
 

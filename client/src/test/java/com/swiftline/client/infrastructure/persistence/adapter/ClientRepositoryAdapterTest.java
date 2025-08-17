@@ -56,7 +56,7 @@ class ClientRepositoryAdapterTest {
                         .phoneNumber(domain.getPhoneNumber())
                         .build())
                 .password(domain.getPassword())
-                .state(domain.getState())
+                .status(domain.getStatus())
                 .build();
         when(clientJpaRepository.save(any(ClientEntity.class))).thenReturn(saved);
 
@@ -99,12 +99,12 @@ class ClientRepositoryAdapterTest {
         Client changes = sampleClient();
         changes.setName("Changed");
         changes.setPassword("newpwd");
-        changes.setState(false);
+        changes.setStatus(false);
 
         Client updated = adapter.update(9L, changes);
         assertEquals(9L, updated.getId());
         assertEquals("Changed", updated.getName());
-        assertEquals(false, updated.getState());
+        assertEquals(false, updated.getStatus());
 
         ArgumentCaptor<ClientEntity> captor = ArgumentCaptor.forClass(ClientEntity.class);
         verify(clientJpaRepository).save(captor.capture());
@@ -142,7 +142,7 @@ class ClientRepositoryAdapterTest {
         c.setAddress("Addr");
         c.setPhoneNumber("555");
         c.setPassword("pwd");
-        c.setState(true);
+        c.setStatus(true);
         return c;
     }
 
@@ -159,7 +159,7 @@ class ClientRepositoryAdapterTest {
                         .phoneNumber("555")
                         .build())
                 .password("pwd")
-                .state(true)
+                .status(true)
                 .build();
     }
 }

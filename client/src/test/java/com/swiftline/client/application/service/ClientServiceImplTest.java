@@ -105,7 +105,7 @@ class ClientServiceImplTest {
                 .address("Street 123")
                 .phoneNumber("555-111")
                 .password("secret")
-                .state(true)
+                .status(true)
                 .build();
     }
 
@@ -119,7 +119,7 @@ class ClientServiceImplTest {
         c.setAddress("Street 123");
         c.setPhoneNumber("555-111");
         c.setPassword("secret");
-        c.setState(true);
+        c.setStatus(true);
         return c;
     }
 }

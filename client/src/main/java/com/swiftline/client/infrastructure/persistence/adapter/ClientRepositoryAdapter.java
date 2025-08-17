@@ -33,7 +33,7 @@ public class ClientRepositoryAdapter implements ClientRepository {
         ClientEntity clientEntity = ClientEntity.builder()
                 .person(personEntity)
                 .password(client.getPassword())
-                .state(client.getState())
+                .status(client.getStatus())
                 .build();
         ClientEntity saved = clientJpaRepository.save(clientEntity);
         return toDomain(saved);
@@ -64,7 +64,7 @@ public class ClientRepositoryAdapter implements ClientRepository {
         p.setPhoneNumber(client.getPhoneNumber());
         // actualizar datos de client
         existing.setPassword(client.getPassword());
-        existing.setState(client.getState());
+        existing.setStatus(client.getStatus());
         ClientEntity saved = clientJpaRepository.save(existing);
         return toDomain(saved);
     }

@@ -120,7 +120,7 @@ class ClientControllerTest {
                 .address("Addr")
                 .phoneNumber("555")
                 .password("pwd")
-                .state(true)
+                .status(true)
                 .build();
     }
 
@@ -134,7 +134,7 @@ class ClientControllerTest {
         c.setAddress("Addr");
         c.setPhoneNumber("555");
         c.setPassword("pwd");
-        c.setState(true);
+        c.setStatus(true);
         return c;
     }
 }

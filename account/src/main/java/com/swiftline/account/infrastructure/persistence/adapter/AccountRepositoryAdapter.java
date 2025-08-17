@@ -49,6 +49,7 @@ public class AccountRepositoryAdapter implements AccountRepository {
         existing.setAccountType(account.getAccountType());
         existing.setInitialBalance(account.getInitialBalance());
         existing.setStatus(account.getStatus());
+        existing.setClientId(account.getClientId());
         AccountEntity saved = accountJpaRepository.save(existing);
         return toDomain(saved);
     }
@@ -73,4 +74,3 @@ public class AccountRepositoryAdapter implements AccountRepository {
         return mapper.map(account, AccountEntity.class);
     }
 }
-

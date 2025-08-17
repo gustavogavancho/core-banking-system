@@ -42,7 +42,7 @@ class AccountControllerTest {
     @Test
     void create_shouldReturn201() throws Exception {
         AccountRequest req = validRequest();
-        Account created = accountWithId(1L);
+        Account created = accountWithId(1L, req.getClientId());
         when(accountService.create(any(AccountRequest.class))).thenReturn(created);
 
         mockMvc.perform(post("/accounts")
@@ -51,7 +51,8 @@ class AccountControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/accounts/1"))
                 .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.accountNumber", is(req.getAccountNumber())));
+                .andExpect(jsonPath("$.accountNumber", is(req.getAccountNumber())))
+                .andExpect(jsonPath("$.clientId", is(req.getClientId().intValue())));
     }
 
     @Test
@@ -68,10 +69,11 @@ class AccountControllerTest {
 
     @Test
     void get_shouldReturn200_whenFound() throws Exception {
-        when(accountService.get(5L)).thenReturn(accountWithId(5L));
+        when(accountService.get(5L)).thenReturn(accountWithId(5L, 123L));
         mockMvc.perform(get("/accounts/5"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(5)));
+                .andExpect(jsonPath("$.id", is(5)))
+                .andExpect(jsonPath("$.clientId", is(123)));
     }
 
     @Test
@@ -84,24 +86,27 @@ class AccountControllerTest {
 
     @Test
     void list_shouldReturnArray() throws Exception {
-        when(accountService.list()).thenReturn(List.of(accountWithId(1L), accountWithId(2L)));
+        when(accountService.list()).thenReturn(List.of(accountWithId(1L, 10L), accountWithId(2L, 20L)));
         mockMvc.perform(get("/accounts"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", is(1)))
-                .andExpect(jsonPath("$[1].id", is(2)));
+                .andExpect(jsonPath("$[0].clientId", is(10)))
+                .andExpect(jsonPath("$[1].id", is(2)))
+                .andExpect(jsonPath("$[1].clientId", is(20)));
     }
 
     @Test
     void update_shouldReturn200() throws Exception {
         AccountRequest req = validRequest();
-        when(accountService.update(eq(7L), any(AccountRequest.class))).thenReturn(accountWithId(7L));
+        when(accountService.update(eq(7L), any(AccountRequest.class))).thenReturn(accountWithId(7L, req.getClientId()));
 
         mockMvc.perform(put("/accounts/7")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(7)));
+                .andExpect(jsonPath("$.id", is(7)))
+                .andExpect(jsonPath("$.clientId", is(req.getClientId().intValue())));
     }
 
     @Test
@@ -117,17 +122,18 @@ class AccountControllerTest {
                 .accountType("SAVINGS")
                 .initialBalance(new BigDecimal("100.00"))
                 .status(true)
+                .clientId(123L)
                 .build();
     }
 
-    private Account accountWithId(Long id) {
+    private Account accountWithId(Long id, Long clientId) {
         return Account.builder()
                 .id(id)
                 .accountNumber("0001")
                 .accountType("SAVINGS")
                 .initialBalance(new BigDecimal("100.00"))
                 .status(true)
+                .clientId(clientId)
                 .build();
     }
 }
-

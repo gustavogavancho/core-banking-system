@@ -32,7 +32,9 @@ public class AccountEntity {
     @Column(nullable = false)
     private Boolean status;
 
+    @Column(name = "client_id", nullable = false)
+    private Long clientId;
+
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TransactionEntity> transactions = new ArrayList<>();
 }
-

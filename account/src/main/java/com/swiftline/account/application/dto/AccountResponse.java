@@ -15,5 +15,5 @@ public class AccountResponse {
     private String accountType;
     private BigDecimal initialBalance;
     private Boolean status;
+    private Long clientId;
 }
-

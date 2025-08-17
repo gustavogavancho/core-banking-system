@@ -15,5 +15,6 @@ public class Account {
     private String accountType;
     private BigDecimal initialBalance;
     private Boolean status;
+    // relación con Client por id
+    private Long clientId;
 }
-

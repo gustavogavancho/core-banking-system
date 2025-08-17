@@ -32,6 +32,6 @@ public class ClientRequest {
     private String password;
 
     @NotNull
-    private Boolean state;
+    private Boolean status;
 }
 

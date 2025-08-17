@@ -22,5 +22,7 @@ public class AccountRequest {
 
     @NotNull
     private Boolean status;
-}
 
+    @NotNull
+    private Long clientId;
+}

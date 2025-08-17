@@ -35,6 +35,7 @@ class AccountRepositoryAdapterTest {
                 .accountType("SAVINGS")
                 .initialBalance(new BigDecimal("100.00"))
                 .status(true)
+                .clientId(123L)
                 .build();
         when(jpa.save(any(AccountEntity.class))).thenAnswer(inv -> {
             AccountEntity e = inv.getArgument(0);
@@ -44,29 +45,33 @@ class AccountRepositoryAdapterTest {
         Account out = adapter.save(toSave);
         assertNotNull(out.getId());
         assertEquals("0001", out.getAccountNumber());
+        assertEquals(123L, out.getClientId());
     }
 
     @Test
     void findById_shouldMapToDomain_whenPresent() {
-        AccountEntity e = entity(5L);
+        AccountEntity e = entity(5L, 10L);
         when(jpa.findById(5L)).thenReturn(Optional.of(e));
         Optional<Account> out = adapter.findById(5L);
         assertTrue(out.isPresent());
         assertEquals(5L, out.get().getId());
+        assertEquals(10L, out.get().getClientId());
     }
 
     @Test
     void findAll_shouldMapList() {
-        when(jpa.findAll()).thenReturn(List.of(entity(1L), entity(2L)));
+        when(jpa.findAll()).thenReturn(List.of(entity(1L, 10L), entity(2L, 20L)));
         List<Account> out = adapter.findAll();
         assertEquals(2, out.size());
         assertEquals(1L, out.get(0).getId());
+        assertEquals(10L, out.get(0).getClientId());
         assertEquals(2L, out.get(1).getId());
+        assertEquals(20L, out.get(1).getClientId());
     }
 
     @Test
     void update_shouldChangeFields_andReturnDomain() {
-        AccountEntity existing = entity(7L);
+        AccountEntity existing = entity(7L, 10L);
         when(jpa.findById(7L)).thenReturn(Optional.of(existing));
         when(jpa.save(any(AccountEntity.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -75,6 +80,7 @@ class AccountRepositoryAdapterTest {
                 .accountType("CHECKING")
                 .initialBalance(new BigDecimal("200.00"))
                 .status(false)
+                .clientId(123L)
                 .build();
         Account out = adapter.update(7L, newData);
         assertEquals(7L, out.getId());
@@ -82,6 +88,7 @@ class AccountRepositoryAdapterTest {
         assertEquals("CHECKING", out.getAccountType());
         assertEquals(new BigDecimal("200.00"), out.getInitialBalance());
         assertFalse(out.getStatus());
+        assertEquals(123L, out.getClientId());
     }
 
     @Test
@@ -98,14 +105,14 @@ class AccountRepositoryAdapterTest {
         assertTrue(adapter.existsById(1L));
     }
 
-    private AccountEntity entity(Long id) {
+    private AccountEntity entity(Long id, Long clientId) {
         return AccountEntity.builder()
                 .id(id)
                 .accountNumber("0001")
                 .accountType("SAVINGS")
                 .initialBalance(new BigDecimal("100.00"))
                 .status(true)
+                .clientId(clientId)
                 .build();
     }
 }
-

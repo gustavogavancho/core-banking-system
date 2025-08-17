@@ -15,6 +15,6 @@ public class ClientResponse {
     private String identification;
     private String address;
     private String phoneNumber;
-    private Boolean state;
+    private Boolean status;
 }
 
