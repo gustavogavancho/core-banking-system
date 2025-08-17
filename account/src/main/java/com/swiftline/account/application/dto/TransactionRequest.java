@@ -1,5 +1,6 @@
 package com.swiftline.account.application.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 public class TransactionRequest {
     @NotNull
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime date;
 
     @NotBlank
@@ -24,4 +26,3 @@ public class TransactionRequest {
     @NotNull
     private BigDecimal balance;
 }
-
