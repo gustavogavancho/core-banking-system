@@ -56,7 +56,9 @@ public class TransactionRepositoryAdapter implements TransactionRepository {
         existing.setDate(transaction.getDate());
         existing.setTransactionType(transaction.getTransactionType());
         existing.setAmount(transaction.getAmount());
-        existing.setBalance(transaction.getBalance());
+        if (transaction.getBalance() != null) {
+            existing.setBalance(transaction.getBalance());
+        }
         TransactionEntity saved = transactionJpaRepository.save(existing);
         return toDomain(saved);
     }
@@ -66,8 +68,21 @@ public class TransactionRepositoryAdapter implements TransactionRepository {
         return transactionJpaRepository.existsById(id);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Transaction> findLastByAccountId(Long accountId) {
+        return transactionJpaRepository
+                .findTopByAccount_IdOrderByDateDescIdDesc(accountId)
+                .map(this::toDomain);
+    }
+
     private Transaction toDomain(TransactionEntity entity) {
-        return mapper.map(entity, Transaction.class);
+        Transaction t = mapper.map(entity, Transaction.class);
+        // Asegurar el mapeo del id de la cuenta
+        if (entity.getAccount() != null) {
+            t.setAccountId(entity.getAccount().getId());
+        }
+        return t;
     }
 
     private TransactionEntity toEntity(Transaction transaction) {

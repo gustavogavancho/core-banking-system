@@ -11,4 +11,5 @@ public interface TransactionRepository {
     List<Transaction> findByAccountId(Long accountId);
     Transaction update(Long id, Transaction transaction);
     boolean existsById(Long id);
+    Optional<Transaction> findLastByAccountId(Long accountId);
 }

@@ -2,7 +2,9 @@ package com.swiftline.account.application.service;
 
 import com.swiftline.account.application.dto.TransactionRequest;
 import com.swiftline.account.application.exception.NotFoundException;
+import com.swiftline.account.application.exception.InsufficientBalanceException;
 import com.swiftline.account.domain.model.Transaction;
+import com.swiftline.account.domain.model.Account;
 import com.swiftline.account.domain.repository.AccountRepository;
 import com.swiftline.account.domain.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +36,10 @@ class TransactionServiceImplTest {
     @Test
     void create_shouldSave_whenAccountExists() {
         Long accountId = 10L;
-        when(accountRepo.existsById(accountId)).thenReturn(true);
+        when(accountRepo.findById(accountId)).thenReturn(Optional.of(
+                Account.builder().id(accountId).initialBalance(new BigDecimal("100.00")).build()
+        ));
+        when(txRepo.findLastByAccountId(accountId)).thenReturn(Optional.empty());
         when(txRepo.save(eq(accountId), any(Transaction.class))).thenAnswer(inv -> {
             Transaction t = inv.getArgument(1);
             t.setId(1L);
@@ -50,8 +55,24 @@ class TransactionServiceImplTest {
 
     @Test
     void create_shouldThrow_whenAccountMissing() {
-        when(accountRepo.existsById(99L)).thenReturn(false);
+        when(accountRepo.findById(99L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> service.create(99L, req()));
+    }
+
+    @Test
+    void create_shouldThrow_whenInsufficientBalance() {
+        Long accountId = 20L;
+        when(accountRepo.findById(accountId)).thenReturn(Optional.of(
+                Account.builder().id(accountId).initialBalance(new BigDecimal("0.00")).build()
+        ));
+        when(txRepo.findLastByAccountId(accountId)).thenReturn(Optional.empty());
+        TransactionRequest req = TransactionRequest.builder()
+                .date(LocalDateTime.now())
+                .transactionType("WITHDRAW")
+                .amount(new BigDecimal("-10.00"))
+                .build();
+        InsufficientBalanceException ex = assertThrows(InsufficientBalanceException.class, () -> service.create(accountId, req));
+        assertEquals("Insufficient balance", ex.getMessage());
     }
 
     @Test
@@ -102,7 +123,6 @@ class TransactionServiceImplTest {
                 .date(LocalDateTime.now())
                 .transactionType("DEPOSIT")
                 .amount(new BigDecimal("50.00"))
-                .balance(new BigDecimal("150.00"))
                 .build();
     }
 }

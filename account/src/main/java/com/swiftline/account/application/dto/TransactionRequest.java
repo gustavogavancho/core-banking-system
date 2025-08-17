@@ -22,7 +22,4 @@ public class TransactionRequest {
 
     @NotNull
     private BigDecimal amount;
-
-    @NotNull
-    private BigDecimal balance;
 }

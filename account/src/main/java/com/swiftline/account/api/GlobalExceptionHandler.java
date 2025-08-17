@@ -2,6 +2,7 @@ package com.swiftline.account.api;
 
 import com.swiftline.account.application.exception.ClientNotFoundException;
 import com.swiftline.account.application.exception.NotFoundException;
+import com.swiftline.account.application.exception.InsufficientBalanceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -24,6 +25,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ClientNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleClientNotFound(ClientNotFoundException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(InsufficientBalanceException.class)
+    public ResponseEntity<Map<String, Object>> handleInsufficientBalance(InsufficientBalanceException ex) {
         Map<String, Object> body = new HashMap<>();
         body.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.swiftline.account.application.dto.TransactionRequest;
 import com.swiftline.account.application.exception.NotFoundException;
+import com.swiftline.account.application.exception.InsufficientBalanceException;
 import com.swiftline.account.application.service.TransactionService;
 import com.swiftline.account.domain.model.Transaction;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +30,6 @@ class TransactionControllerTest {
 
     private MockMvc mockMvc;
     private TransactionService transactionService;
-    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setup() {
@@ -39,8 +39,8 @@ class TransactionControllerTest {
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
 
-        // Configurar ObjectMapper para manejar LocalDateTime de manera más explícita
-        objectMapper = new ObjectMapper();
+        // Configurar ObjectMapper para manejar LocalDateTime de manera más explícita (solo referencia local)
+        ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -53,8 +53,7 @@ class TransactionControllerTest {
             {
                 "date": "2024-01-15T10:30:00",
                 "transactionType": "DEPOSIT",
-                "amount": 50.00,
-                "balance": 150.00
+                "amount": 50.00
             }
             """;
         Transaction created = transactionWithId(1L, accountId);
@@ -77,8 +76,7 @@ class TransactionControllerTest {
             {
                 "date": "2024-01-15T10:30:00",
                 "transactionType": "DEPOSIT",
-                "amount": 50.00,
-                "balance": 150.00
+                "amount": 50.00
             }
             """;
         when(transactionService.create(eq(accountId), any(TransactionRequest.class)))
@@ -89,6 +87,26 @@ class TransactionControllerTest {
                         .content(jsonRequest))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message", is("no account")));
+    }
+
+    @Test
+    void create_shouldReturn400_whenInsufficientBalance() throws Exception {
+        Long accountId = 10L;
+        String jsonRequest = """
+            {
+                "date": "2024-01-15T10:30:00",
+                "transactionType": "WITHDRAW",
+                "amount": -200.00
+            }
+            """;
+        when(transactionService.create(eq(accountId), any(TransactionRequest.class)))
+                .thenThrow(new InsufficientBalanceException("Insufficient balance"));
+
+        mockMvc.perform(post("/accounts/{accountId}/transactions", accountId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Insufficient balance")));
     }
 
     @Test
@@ -116,8 +134,7 @@ class TransactionControllerTest {
             {
                 "date": "2024-01-15T10:30:00",
                 "transactionType": "WITHDRAW",
-                "amount": 25.00,
-                "balance": 125.00
+                "amount": 25.00
             }
             """;
         when(transactionService.update(eq(7L), any(TransactionRequest.class)))
@@ -128,15 +145,6 @@ class TransactionControllerTest {
                         .content(jsonRequest))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(7)));
-    }
-
-    private TransactionRequest validRequest() {
-        return TransactionRequest.builder()
-                .date(LocalDateTime.of(2024, 1, 15, 10, 30, 0))
-                .transactionType("DEPOSIT")
-                .amount(new BigDecimal("50.00"))
-                .balance(new BigDecimal("150.00"))
-                .build();
     }
 
     private Transaction transactionWithId(Long id, Long accountId) {
