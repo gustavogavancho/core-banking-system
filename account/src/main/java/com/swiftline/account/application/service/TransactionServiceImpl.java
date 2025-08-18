@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 @Transactional
@@ -77,11 +79,55 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction update(Long id, TransactionRequest request) {
-        if (!transactionRepository.existsById(id)) {
-            throw new NotFoundException("Movimiento no encontrado con id=" + id);
+        // Cargar transacción existente para conocer cuenta
+        Transaction existing = transactionRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Movimiento no encontrado con id=" + id));
+
+        // Validar cuenta y obtener saldo inicial
+        var account = accountRepository.findById(existing.getAccountId())
+                .orElseThrow(() -> new NotFoundException("Cuenta no encontrada con id=" + existing.getAccountId()));
+
+        // Construir versión actualizada de la transacción objetivo
+        if (request.getAmount() == null) {
+            throw new IllegalArgumentException("El monto de la transacción es obligatorio");
         }
-        Transaction tx = toDomain(request);
-        return transactionRepository.update(id, tx);
+        Transaction updatedTarget = toDomain(request);
+        updatedTarget.setId(id);
+        updatedTarget.setAccountId(existing.getAccountId());
+        // balance se recalculará abajo
+
+        // Obtener todas las transacciones de la cuenta y reemplazar la objetivo con los nuevos datos
+        List<Transaction> all = new ArrayList<>(transactionRepository.findByAccountId(existing.getAccountId()));
+        for (int i = 0; i < all.size(); i++) {
+            if (all.get(i).getId().equals(id)) {
+                all.set(i, updatedTarget);
+                break;
+            }
+        }
+
+        // Ordenar por fecha ascendente y desempatar por id ascendente
+        all.sort(Comparator
+                .comparing(Transaction::getDate)
+                .thenComparing(Transaction::getId));
+
+        // Recalcular balances encadenados desde saldo inicial
+        BigDecimal running = account.getInitialBalance();
+        Transaction result = null;
+        for (Transaction t : all) {
+            running = running.add(t.getAmount());
+            if (running.compareTo(BigDecimal.ZERO) < 0) {
+                throw new InsufficientBalanceException("Insufficient balance");
+            }
+            t.setBalance(running);
+            // Persistir cada transacción con el nuevo balance (y datos actualizados si corresponde)
+            Transaction persisted = transactionRepository.update(t.getId(), t);
+            if (t.getId().equals(id)) {
+                result = persisted;
+            }
+        }
+
+        // Por seguridad, si no se encontró (no debería pasar), devolver la existente actualizada
+        return result != null ? result : transactionRepository.update(id, updatedTarget);
     }
 
     private Transaction toDomain(TransactionRequest r) {

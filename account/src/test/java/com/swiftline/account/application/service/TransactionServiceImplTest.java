@@ -104,17 +104,45 @@ class TransactionServiceImplTest {
     }
 
     @Test
-    void update_shouldCallRepo_whenExists() {
-        when(txRepo.existsById(7L)).thenReturn(true);
-        when(txRepo.update(eq(7L), any(Transaction.class)))
-                .thenReturn(Transaction.builder().id(7L).build());
-        Transaction out = service.update(7L, req());
-        assertEquals(7L, out.getId());
+    void update_shouldRecalculateBalance_andPersist() {
+        Long accountId = 1L;
+        Long txId = 7L;
+        // transacción existente
+        when(txRepo.findById(txId)).thenReturn(Optional.of(Transaction.builder()
+                .id(txId).accountId(accountId)
+                .date(LocalDateTime.of(2024,1,10,10,0))
+                .transactionType("DEPOSIT").amount(new BigDecimal("50.00"))
+                .balance(new BigDecimal("150.00"))
+                .build()));
+        // cuenta
+        when(accountRepo.findById(accountId)).thenReturn(Optional.of(Account.builder()
+                .id(accountId).initialBalance(new BigDecimal("100.00")).build()));
+        // lista de transacciones de la cuenta (solo la objetivo para simplificar)
+        when(txRepo.findByAccountId(accountId)).thenReturn(List.of(Transaction.builder()
+                .id(txId).accountId(accountId)
+                .date(LocalDateTime.of(2024,1,10,10,0))
+                .transactionType("DEPOSIT").amount(new BigDecimal("50.00"))
+                .balance(new BigDecimal("150.00"))
+                .build()));
+        // update persiste y devuelve
+        when(txRepo.update(eq(txId), any(Transaction.class))).thenAnswer(inv -> inv.getArgument(1));
+
+        TransactionRequest req = TransactionRequest.builder()
+                .date(LocalDateTime.of(2024,1,10,10,0))
+                .transactionType("WITHDRAW")
+                .amount(new BigDecimal("-25.00"))
+                .build();
+
+        Transaction out = service.update(txId, req);
+        assertEquals(txId, out.getId());
+        // saldo esperado: 100 inicial + (-25) = 75
+        assertEquals(new BigDecimal("75.00"), out.getBalance());
+        assertEquals(new BigDecimal("-25.00"), out.getAmount());
     }
 
     @Test
     void update_shouldThrow_whenMissing() {
-        when(txRepo.existsById(7L)).thenReturn(false);
+        when(txRepo.findById(7L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> service.update(7L, req()));
     }
 
