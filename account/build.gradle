@@ -1,3 +1,4 @@
 dependencies {
     implementation project(':shared')
+    testImplementation 'com.intuit.karate:karate-junit5:1.4.1'
 }
