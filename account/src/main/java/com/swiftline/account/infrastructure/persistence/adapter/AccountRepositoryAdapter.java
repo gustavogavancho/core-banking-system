@@ -59,6 +59,12 @@ public class AccountRepositoryAdapter implements AccountRepository {
         return accountJpaRepository.existsById(id);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Account> findByClientId(Long clientId) {
+        return accountJpaRepository.findByClientId(clientId).stream().map(this::toDomain).toList();
+    }
+
     private Account toDomain(AccountEntity entity) {
         return mapper.map(entity, Account.class);
     }

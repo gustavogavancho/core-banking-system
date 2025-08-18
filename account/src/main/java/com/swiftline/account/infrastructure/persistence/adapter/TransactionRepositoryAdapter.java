@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -73,6 +74,22 @@ public class TransactionRepositoryAdapter implements TransactionRepository {
     public Optional<Transaction> findLastByAccountId(Long accountId) {
         return transactionJpaRepository
                 .findTopByAccount_IdOrderByDateDescIdDesc(accountId)
+                .map(this::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Transaction> findByAccountIdAndDateBetween(Long accountId, LocalDateTime from, LocalDateTime to) {
+        return transactionJpaRepository
+                .findByAccount_IdAndDateBetweenOrderByDateAscIdAsc(accountId, from, to)
+                .stream().map(this::toDomain).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Transaction> findLastBeforeDate(Long accountId, LocalDateTime date) {
+        return transactionJpaRepository
+                .findTopByAccount_IdAndDateLessThanEqualOrderByDateDescIdDesc(accountId, date)
                 .map(this::toDomain);
     }
 

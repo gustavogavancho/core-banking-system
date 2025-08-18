@@ -2,6 +2,7 @@ package com.swiftline.account.domain.repository;
 
 import com.swiftline.account.domain.model.Transaction;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,4 +13,8 @@ public interface TransactionRepository {
     Transaction update(Long id, Transaction transaction);
     boolean existsById(Long id);
     Optional<Transaction> findLastByAccountId(Long accountId);
+    // nuevo: transacciones por cuenta y rango de fechas (ordenadas por fecha/id asc)
+    List<Transaction> findByAccountIdAndDateBetween(Long accountId, LocalDateTime from, LocalDateTime to);
+    // nuevo: última transacción antes de una fecha dada
+    Optional<Transaction> findLastBeforeDate(Long accountId, LocalDateTime date);
 }

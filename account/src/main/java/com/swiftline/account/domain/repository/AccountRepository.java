@@ -11,4 +11,5 @@ public interface AccountRepository {
     List<Account> findAll();
     Account update(Long id, Account account);
     boolean existsById(Long id);
+    List<Account> findByClientId(Long clientId);
 }
