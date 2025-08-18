@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: core-banking-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: core-banking-system
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    ports:
+      - "3307:3306"  # Cambiado a puerto 3307 para evitar conflicto
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./BaseDatos.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    networks:
+      - banking-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p1234"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  client-service:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: core-banking-client
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/core-banking-system
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1234
+      SERVER_PORT: 8081
+    ports:
+      - "8081:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - banking-network
+    restart: unless-stopped
+
+  account-service:
+    build:
+      context: ./account
+      dockerfile: Dockerfile
+    container_name: core-banking-account
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/core-banking-system
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1234
+      SERVER_PORT: 8080
+      CLIENT_SERVICE_URL: http://client-service:8081
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      client-service:
+        condition: service_started
+    networks:
+      - banking-network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  banking-network:
+    driver: bridge
